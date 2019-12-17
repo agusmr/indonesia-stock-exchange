@@ -20,6 +20,7 @@ class GetCompanyProfile():
         self.interval = int(sys.argv[3])
 
     def get_ticker(self):
+        "Returns a list of URLs for each ticker code."
         
         with open(self.data, 'r') as f:
             data = json.load(f)
@@ -30,6 +31,7 @@ class GetCompanyProfile():
         return ticker
     
     def main(self, ticker):
+        "Crawl company profile."
 
         file_name =  ticker.translate(str.maketrans('', '', string.punctuation))
 
