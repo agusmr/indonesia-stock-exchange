@@ -1,27 +1,38 @@
-from json import dump
-from requests import get
-from os import getcwd
-from sys import argv
-from time import sleep
+import json
+import logging
+import os
+import requests
+import sys
+import time
+from datetime import datetime
 
-OUTPUT_PATH = getcwd() + '/output/'
-BASE_URL = 'https://www.idx.co.id/umbraco/Surface/Helper/GetEmiten?emitenType=s'
-NUM_RETRY = int(argv[1])
-SLEEP_TIME = int(argv[2])
+class GetEmiten():
 
-def get_emiten():
-    "Returns publicly listed companies in Indonesia Stock Exchange."
-
-    i = 0
-    while i < NUM_RETRY:
-        try:
-            response = get(BASE_URL).json()
-            with open(OUTPUT_PATH + 'get-companies.json', 'w') as json_file:
-                dump(response, json_file)
-            i = NUM_RETRY
-        except Exception:
-            sleep(SLEEP_TIME)
-            i += 1
+    def __init__(self):
+        self.path = os.getcwd() + '/output/'
+        self.base_url = 'https://www.idx.co.id/umbraco/Surface/Helper/GetEmiten?emitenType=s'
+        self.retry = int(sys.argv[1])
+        self.t = int(sys.argv[2])
+        self.interval = int(sys.argv[3])
+    
+    def main(self):
+        "Returns publicly listed companies in Indonesia Stock Exchange."
+        i = 0
+        while i < self.retry:
+            try:
+                response = requests.get(self.base_url, timeout = self.t).json()
+                with open(self.path + 'get-companies.json', 'w') as f:
+                    json.dump(response, f)
+                i = self.retry
+            except Exception as e:
+                logging.error(e)
+                time.sleep(self.interval)
+                i += 1
         
 if __name__ == "__main__":
-    get_emiten()
+    logging.basicConfig(
+        format = '%(asctime)s: %(message)s', 
+        filename = os.getcwd() + '/logs/get-emiten-{}.log'.format(datetime.now().strftime('%Y%m%d%H%M%S')), 
+        level = logging.DEBUG
+    )
+    GetEmiten().main()
