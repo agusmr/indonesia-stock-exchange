@@ -69,5 +69,22 @@ And the following:
 sh ./bash/financial-statement-dataframe.sh [BEG_YEAR] [END_YEAR]
 ```
 
+## Output Sample
+
+### Publicly Listed Companies
+
+The output will be in JSON format. Following is the snippet:
+
+```
+{
+  "KodeEmiten": "AALI",
+  "NamaEmiten": "Astra Agro Lestari Tbk"
+},
+{
+  "KodeEmiten": "ABBA",
+  "NamaEmiten": "Mahaka Media Tbk"
+}
+```
+
 ## End
 Hope you enjoy this. Once again, see [wiki](https://github.com/ledwindra/indonesia-stock-exchange/wiki/How-to-Get-Financial-Data-when-You-are-not-Rich-AF) for details. Thanks for reading! :smile:
