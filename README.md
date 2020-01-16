@@ -55,6 +55,14 @@ Ubuntu
 sudo apt-get install postgresql
 ```
 
+## Test
+
+Test before deploying to production.
+
+```
+sh run_test.sh
+```
+
 ## Heroku
 
 Add ons:
