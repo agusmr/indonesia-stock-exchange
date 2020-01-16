@@ -6,11 +6,28 @@ This repository aims to get the financial data of publicly listed companies in I
 
 I have only tested this using Python 3.7.3 (:snake:), but it should be fine for any Python 3.x. However, I won't bother testing it using Python 2.x. You can read [wiki](https://github.com/ledwindra/indonesia-stock-exchange/wiki/How-to-Get-Financial-Data-when-You-are-not-Rich-AF) for more details. Or you can visit [my Medium](https://medium.com/@lukmanedwindra/get-financial-information-from-indonesian-publicly-listed-companies-for-free-74870235f783) article related to this repository. I hope this can be useful for your own purpose. :smile:
 
+## Folder structure
+
+```
+.
+├── Procfile
+├── requirements.txt
+├── src
+│   ├── get_company_profile.py
+│   ├── get_listed_company.py
+│   └── get_trade_summary.py
+└── util
+    ├── get_company_profile.sql
+    ├── get_listed_company.sql
+    └── get_trade_summary.sql
+```
+
 ## Clone
 
 ```
 cd ~
 git clone https://github.com/ledwindra/indonesia-stock-exchange.git
+cd indonesia-stock-exchange/
 ```
 
 ## Install requirements
