@@ -1,56 +1,77 @@
 import json
-import logging
-import multiprocessing
-import os
+import psycopg2
 import requests
-import string
-import sys
-import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
-class GetCompanyProfile():
+with open('connection.json') as f:
+    CONNECTION = json.load(f)
 
-    def __init__(self):
-        
-        self.data = os.getcwd() + '/output/get-companies.json'
-        self.url = 'https://www.idx.co.id/umbraco/Surface/ListedCompany/GetCompanyProfilesDetail?emitenType=&kodeEmiten={}&language=id-id'
-        self.path = os.getcwd() + '/output/company-profile/'
-        self.retry = int(sys.argv[1])
-        self.timeout = int(sys.argv[2])
-        self.interval = int(sys.argv[3])
-
-    def get_ticker(self):
-        "Returns a list of URLs for each ticker code."
-        
-        with open(self.data, 'r') as f:
-            data = json.load(f)
-            
-        ticker = [x.get('KodeEmiten') for x in data]
-        ticker = [self.url.format(x) for x in ticker]
-
-        return ticker
+PSQL_CONNECT = psycopg2.connect(
+    host=CONNECTION.get('host'),
+    port=CONNECTION.get('port'),
+    database=CONNECTION.get('database'),
+    user=CONNECTION.get('user'),
+    password=CONNECTION.get('password')
+)
+CUR = PSQL_CONNECT.cursor()
+LISTED_COMPANY = requests.get('https://www.idx.co.id/umbraco/Surface/Helper/GetEmiten?emitenType=s').json()
     
-    def main(self, ticker):
-        "Crawl company profile."
+def main():
 
-        file_name =  ticker.translate(str.maketrans('', '', string.punctuation))
+    data = []
+    for ticker in LISTED_COMPANY:
+        url = f'https://www.idx.co.id/umbraco/Surface/ListedCompany/GetCompanyProfilesDetail?emitenType=&kodeEmiten={ticker.get("KodeEmiten")}&language=id-id'
+        response = requests.get(url)
+        data.append(response.json())
 
-        i = 0
-        while i < self.retry:
-            try:
-                r = requests.get(ticker).json()
-                with open(self.path + '{}.json'.format(file_name), 'w') as f:
-                    json.dump(r, f)
-            except Exception as e:
-                logging.error(e)
-                time.sleep(self.interval)
-                i += 1
+    for d in data:
+        try:
+            CUR.execute(
+                """
+                INSERT INTO company_profile (
+                    ticker_code,
+                    company_address,
+                    sector,
+                    subsector,
+                    listing_date,
+                    website,
+                    count_secretary,
+                    count_director,
+                    count_commissioner,
+                    count_audit_committee,
+                    count_stakeholder,
+                    count_subsidiary,
+                    count_dividend,
+                    created_at
+                ) VALUES (
+                    %s, %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s, %s
+                )
+                """,
+                (
+                    d.get('Search').get('KodeEmiten'),
+                    d.get('Profiles')[0].get('Alamat').upper(),
+                    d.get('Profiles')[0].get('Sektor').upper(),
+                    d.get('Profiles')[0].get('SubSektor').upper(),
+                    datetime.strptime(d.get('Profiles')[0].get('TanggalPencatatan')[:10], '%Y-%m-%d').date(),
+                    d.get('Profiles')[0].get('Website').lower(),
+                    len(d.get('Sekretaris')),
+                    len(d.get('Direktur')),
+                    len(d.get('Komisaris')),
+                    len(d.get('KomiteAudit')),
+                    len(d.get('PemegangSaham')),
+                    len(d.get('AnakPerusahaan')),
+                    len(d.get('Dividen')),
+                    datetime.now() + timedelta(hours = 7)
+                )
+            )
+            PSQL_CONNECT.commit()
+        except psycopg2.errors.UniqueViolation:
+            PSQL_CONNECT.rollback()
+            pass
 
+    CUR.close()
+    PSQL_CONNECT.close()
+        
 if __name__ == "__main__":
-    logging.basicConfig(
-        format = '%(asctime)s: %(message)s', 
-        filename = os.getcwd() + '/logs/get-company-profile-{}.log'.format(datetime.now().strftime('%Y%m%d%H%M%S')), 
-        level = logging.DEBUG
-    )
-    profile = GetCompanyProfile()
-    multiprocessing.Pool(5).map(profile.main, profile.get_ticker())
+    main()
