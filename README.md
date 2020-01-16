@@ -8,12 +8,19 @@ This repository aims to get the financial data of publicly listed companies in I
 
 ```
 .
+├── LICENSE
 ├── Procfile
+├── README.md
+├── connection.json
 ├── requirements.txt
 ├── src
 │   ├── get_company_profile.py
 │   ├── get_listed_company.py
 │   └── get_trade_summary.py
+├── test
+│   ├── test_get_company_profile.py
+│   ├── test_get_listed_company.py
+│   └── test_get_trade_summary.py
 └── util
     ├── get_company_profile.sql
     ├── get_listed_company.sql
