@@ -1,73 +1,101 @@
-# load modules
-import logging
-from json import dump, load
-from requests import get
-from datetime import date, datetime, timedelta
-from multiprocessing import Pool, cpu_count
-from os import getcwd
-from sys import argv
-from string import punctuation
-from time import sleep
+import json
+import psycopg2
+import requests
+from datetime import datetime, timedelta
 
-# log
-logfile = date.today().strftime('%Y%m%d')
-logging.basicConfig(
-    format='%(asctime)s: %(message)s', 
-    filename=getcwd() + '/logs/get-trade-summary-{}.log'.format(logfile), 
-    level=logging.DEBUG
+with open('connection.json') as f:
+    CONNECTION = json.load(f)
+
+PSQL_CONNECT = psycopg2.connect(
+    host=CONNECTION.get('host'),
+    port=CONNECTION.get('port'),
+    database=CONNECTION.get('database'),
+    user=CONNECTION.get('user'),
+    password=CONNECTION.get('password')
 )
+CUR = PSQL_CONNECT.cursor()
+LISTED_COMPANY = len(
+    requests.get('https://www.idx.co.id/umbraco/Surface/Helper/GetEmiten?emitenType=s').json()
+)
+TRADING_DATE = datetime.now().strftime('%Y-%m-%d')
 
-# create constants
-OUTPUT_PATH = getcwd() + '/output/'
-BASE_URL = 'https://idx.co.id/umbraco/Surface/TradingSummary/GetStockSummary?date={}&start=0&length={}'
+def main():
 
-# create arguments
-BASE_DATE = argv[1]
-NUM_POOL = cpu_count() - int(argv[2])
-NUM_RETRY = int(argv[3])
-SLEEP_TIME = int(argv[4])
-NUM_TIMEOUT = int(argv[5])
+    url = f'https://idx.co.id/umbraco/Surface/TradingSummary/GetStockSummary?date={TRADING_DATE}&start=0&length={LISTED_COMPANY}'
+    data = requests.get(url).json().get('data')
 
-def get_urls():
-    "Returns URLs that will be crawled to get daily trading summary.s"
-    
-    # open json file which contains publicly listed companies in IDX
-    with open(OUTPUT_PATH + 'get-companies.json', 'r') as json_file:
-        data = load(json_file)
-
-    # declare base date
-    base_date = datetime.strptime(BASE_DATE, '%Y%m%d').date()
-    
-    # store URLs for each date
-    urls = []
-    while base_date <= date.today():
-        urls.append(BASE_URL.format(base_date.strftime('%Y%m%d'), len(data)))
-        base_date += timedelta(days = 1)
-
-    return urls
-
-def get_trade_summary(urls):
-    "Crawls daily trading summary."
-
-    # output file name
-    file_name =  urls.translate(str.maketrans('', '', punctuation))
-
-    # attempt three times in case of connection timed out
-    # assign time interval betwen attempts
-    # save output in json format
-    i = 0
-    while i < NUM_RETRY:
+    for d in data:
         try:
-            response = get(urls, timeout = NUM_TIMEOUT)
-            if response.status_code == 200:
-                with open(OUTPUT_PATH + 'trade-summary/' + file_name + '.json', 'w') as json_file:
-                    dump(response.json(), json_file)
-            i = NUM_RETRY
-        except Exception:
-            sleep(SLEEP_TIME)
-            i += 1
+            CUR.execute(
+                """
+                INSERT INTO trade_summary (
+                    ticker_code,
+                    previous,
+                    open_price,
+                    first_trade,
+                    high_price,
+                    low_price,
+                    closing_price,
+                    change_price,
+                    trading_volume,
+                    trading_value,
+                    frequency,
+                    index_individual,
+                    offer,
+                    offer_volume,
+                    bid,
+                    bid_volume,
+                    listed_share,
+                    tradeable_share,
+                    weight_for_index,
+                    foreign_sell,
+                    foreign_buy,
+                    non_regular_volume,
+                    non_regular_value,
+                    non_regular_frequency,
+                    trading_date,
+                    created_at
+                ) VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                )
+                """,
+                (
+                    d.get('StockCode'),
+                    int(d.get('Previous')),
+                    int(d.get('OpenPrice')),
+                    int(d.get('FirstTrade')),
+                    int(d.get('High')),
+                    int(d.get('Low')),
+                    int(d.get('Close')),
+                    int(d.get('Change')),
+                    int(d.get('Volume')),
+                    int(d.get('Value')),
+                    int(d.get('Frequency')),
+                    int(d.get('IndexIndividual')),
+                    int(d.get('Offer')),
+                    int(d.get('OfferVolume')),
+                    int(d.get('Bid')),
+                    int(d.get('BidVolume')),
+                    int(d.get('ListedShares')),
+                    int(d.get('TradebleShares')),
+                    int(d.get('WeightForIndex')),
+                    int(d.get('ForeignSell')),
+                    int(d.get('ForeignBuy')),
+                    int(d.get('NonRegularVolume')),
+                    int(d.get('NonRegularValue')),
+                    int(d.get('NonRegularFrequency')),
+                    TRADING_DATE,
+                    datetime.now() + timedelta(hours = 7)
+                )
+            )
+            PSQL_CONNECT.commit()
+        except psycopg2.errors.UniqueViolation:
+            PSQL_CONNECT.rollback()
+            pass
+
+    CUR.close()
+    PSQL_CONNECT.close()
 
 if __name__ == "__main__":
-    
-    # crawls multiple URLs at the same time
-    Pool(NUM_POOL).map(get_trade_summary, get_urls())
+    main()
