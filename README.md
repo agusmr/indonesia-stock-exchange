@@ -31,7 +31,7 @@ cd indonesia-stock-exchange/
 ## Install requirements
 
 ```
-python3 -m pip install -r requirements
+python3 -m pip install -r requirements.txt
 ```
 
 ## Install PostgreSQL
