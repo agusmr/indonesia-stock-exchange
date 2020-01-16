@@ -6,84 +6,64 @@ This repository aims to get the financial data of publicly listed companies in I
 
 I have only tested this using Python 3.7.3 (:snake:), but it should be fine for any Python 3.x. However, I won't bother testing it using Python 2.x. You can read [wiki](https://github.com/ledwindra/indonesia-stock-exchange/wiki/How-to-Get-Financial-Data-when-You-are-not-Rich-AF) for more details. Or you can visit [my Medium](https://medium.com/@lukmanedwindra/get-financial-information-from-indonesian-publicly-listed-companies-for-free-74870235f783) article related to this repository. I hope this can be useful for your own purpose. :smile:
 
-## Install Requirements
-
-Run the following in the terminal :computer::
+## Clone
 
 ```
-pip install -r requirements.txt
-```
-
-## Add this Repo to Your Machine
-
-Run the following in the terminal :computer::
-
-```
+cd ~
 git clone https://github.com/ledwindra/indonesia-stock-exchange.git
 ```
 
-## Example
-
-### Daily Trading Summary
-
-Following is the template :snake::
-```
-python src/get_trading_summary.py [BASE_DATE] [NUM_POOL] [NUM_RETRY] [SLEEP_TIME] [NUM_TIMEOUT]
-```
-
-Following is the example :snake::
+## Install requirements
 
 ```
-python src/get_trading_summary.py 20191104 1 3 30 10
+python3 -m pip install -r requirements
 ```
 
-See [wiki](https://github.com/ledwindra/indonesia-stock-exchange/wiki/How-to-Get-Financial-Data-when-You-are-not-Rich-AF) for details.
+## Install PostgreSQL
 
-### Financial Statements
-
-Following is the template :snake::
+Mac
 
 ```
-python src/get_financial_statement.py [YEAR] [AUDITED] [YEARLY] [NUM_POOL] [NUM_RETRY] [SLEEP_TIME] [NUM_TIMEOUT]
+brew install postgresql
 ```
 
-Following is the example :snake::
+Ubuntu
 
 ```
-python src/get_financial_statement.py 2018 Audit Tahunan 1 3 30 10
+sudo apt-get install postgresql
 ```
 
-See [wiki](https://github.com/ledwindra/indonesia-stock-exchange/wiki/How-to-Get-Financial-Data-when-You-are-not-Rich-AF) for details.
+## Heroku
 
-## Shell :shell:
+Add ons:
 
-To ease your mind, run those Python programs simultaneously using your terminal :computer::
+1. Heroku Postgres ([link](https://elements.heroku.com/addons/heroku-postgresql))
+2. Heroku Scheduler ([link](https://elements.heroku.com/addons/scheduler))
 
-```
-sh ./bash/financial-statement.sh [YEAR] [NUM_POOL] [NUM_RETRY] [SLEEP_TIME] [NUM_TIMEOUT]
-```
+## Install Heroku
 
-And the following:
-
-```
-sh ./bash/financial-statement-dataframe.sh [BEG_YEAR] [END_YEAR]
-```
-
-## Output Sample
-
-### Publicly Listed Companies
-
-The output will be in JSON format. Following is the snippet:
+Mac
 
 ```
-{
-  "KodeEmiten": "AALI",
-  "NamaEmiten": "Astra Agro Lestari Tbk"
-},
-{
-  "KodeEmiten": "ABBA",
-  "NamaEmiten": "Mahaka Media Tbk"
-}
+brew tap heroku/brew && brew install heroku
+```
+
+## Connect to Heroku
+
+```
+heroku login
+heroku create
+git add .
+git commit -m "Deploy to Heroku"
+git push heroku master
+```
+
+## Scheduler
+
+```
+python3 src/get_listed_company.py
+python3 src/get_company_profile.py
+python3 src/get_trade_summary.py
 ```
 
 ## End
