@@ -3,15 +3,13 @@ import psycopg2
 import requests
 from datetime import datetime, timedelta
 
-with open('connection.json') as f:
-    CONNECTION = json.load(f)
-
+CONNECTION = json.load(open('connection.json'))
 PSQL_CONNECT = psycopg2.connect(
-    host=CONNECTION.get('host'),
-    port=CONNECTION.get('port'),
-    database=CONNECTION.get('database'),
-    user=CONNECTION.get('user'),
-    password=CONNECTION.get('password')
+    host=CONNECTION['host'],
+    port=CONNECTION['port'],
+    database=CONNECTION['database'],
+    user=CONNECTION['user'],
+    password=CONNECTION['password']
 )
 CUR = PSQL_CONNECT.cursor()
 LISTED_COMPANY = requests.get('https://www.idx.co.id/umbraco/Surface/Helper/GetEmiten?emitenType=s').json()
