@@ -5,6 +5,7 @@ import requests
 import sys
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine, exc
+from time import sleep
 from zipfile import BadZipFile
 
 CONNECTION = json.load(open('connection.json'))
@@ -34,9 +35,20 @@ class FinancialStatement:
     def get_url(self):
 
         url = f"http://www.idx.co.id/Portals/0/StaticData/ListedCompanies/Corporate_Actions/New_Info_JSX/Jenis_Informasi/01_Laporan_Keuangan/02_Soft_Copy_Laporan_Keuangan//Laporan%20Keuangan%20Tahun%20{self.year}/{self.quarter}/{self.ticker_code}/FinancialStatement-{self.year}-{self.yearly}-{self.ticker_code}.xlsx"
-        response = requests.get(url)
-        if response.status_code == 200:
-            os.system(f'wget {url}')
+        i = 0
+        while i < 5:
+            try:
+                response = requests.get(url, timeout=None)
+                if response.status_code != 200:
+                    i = 5
+                    pass
+                else:
+                    os.system(f'wget {url}')
+                    i = 5
+            except Exception as error:
+                print(error)
+                sleep(60)
+                i += 1
 
     def get_general_info(self):
 
