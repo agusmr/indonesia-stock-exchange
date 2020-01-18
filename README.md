@@ -10,17 +10,18 @@ This repository aims to get the financial data of publicly listed companies in I
 .
 ├── Procfile
 ├── connection.json
+├── get_financial_statement.ipynb
 ├── requirements.txt
 ├── src
-│   ├── get_company_profile.py
-│   ├── get_financial_statement.py
-│   ├── get_listed_company.py
-│   └── get_trade_summary.py
+│   ├── get_company_profile.py
+│   ├── get_financial_statement.py
+│   ├── get_listed_company.py
+│   └── get_trade_summary.py
 └── util
     ├── get_company_profile.sql
+    ├── get_financial_statement.sql
     ├── get_listed_company.sql
-    ├── get_trade_summary.sql
-    └── run.sh
+    └── get_trade_summary.sql
 ```
 
 ## Clone
@@ -90,6 +91,7 @@ git push heroku master
 python3 src/get_listed_company.py
 python3 src/get_company_profile.py
 python3 src/get_trade_summary.py
+python3 src/get_financial_statement.py 2019 Audit Tahunan
 ```
 
 ## End
