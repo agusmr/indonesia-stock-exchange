@@ -93,6 +93,5 @@ def get_financial_statement():
     
 
 if __name__ == '__main__':
-    os.chdir('tmp')
     get_financial_statement()
-    os.system('rm -r ./*')
+    os.system('rm -r *.xlsx')
