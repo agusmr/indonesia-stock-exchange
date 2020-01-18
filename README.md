@@ -8,15 +8,23 @@ This repository aims to get the financial data of publicly listed companies in I
 
 ```
 .
+├── LICENSE.md
 ├── Procfile
+├── README.md
 ├── connection.json
 ├── get_financial_statement.ipynb
 ├── requirements.txt
+├── run_test.sh
 ├── src
 │   ├── get_company_profile.py
 │   ├── get_financial_statement.py
 │   ├── get_listed_company.py
 │   └── get_trade_summary.py
+├── test
+│   ├── test_get_company_profile.py
+│   ├── test_get_financial_statement.py
+│   ├── test_get_listed_company.py
+│   └── test_get_trade_summary.py
 └── util
     ├── get_company_profile.sql
     ├── get_financial_statement.sql
