@@ -1,9 +1,14 @@
+import json
 import os
 import pandas as pd
 import requests
 import sys
+from datetime import datetime, timedelta
+from sqlalchemy import create_engine, exc
 from zipfile import BadZipFile
 
+CONNECTION = json.load(open('connection.json'))
+ENGINE = create_engine(f"postgresql://{CONNECTION['user']}:{CONNECTION['password']}@{CONNECTION['host']}:{CONNECTION['port']}/{CONNECTION['database']}")
 YEAR = sys.argv[1]
 QUARTER = sys.argv[2]
 YEARLY = sys.argv[3]
@@ -50,8 +55,8 @@ class FinancialStatement:
             'Current year auditor'
         ]]
         df.columns = [
-            'entity_code',
-            'period',
+            'ticker_code',
+            'report_period',
             'currency',
             'conversion_rate',
             'rounding',
@@ -59,8 +64,17 @@ class FinancialStatement:
             'audit_opinion',
             'auditor'
         ]
+        df['created_at'] = datetime.now() + timedelta(hours = 7)
 
-        return df.to_csv(f'general-info-{self.ticker_code}-{self.year}-{self.yearly}.csv', index=False)
+        try:        
+            return df.to_sql(
+                'financial_statement', 
+                con=ENGINE,
+                if_exists='append',
+                index=False
+            )
+        except exc.IntegrityError:
+            pass
 
 def get_financial_statement():
 
@@ -76,8 +90,9 @@ def get_financial_statement():
             pass
         except BadZipFile:
             pass
+    
 
 if __name__ == '__main__':
     os.chdir('tmp')
     get_financial_statement()
-    os.sys
+    os.system('rm -r ./*')
