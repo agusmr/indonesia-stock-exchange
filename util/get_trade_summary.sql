@@ -1,5 +1,5 @@
 CREATE TABLE trade_summary (
-    ticker_code VARCHAR (4) NOT NULL PRIMARY KEY UNIQUE,
+    ticker_code VARCHAR (5) NOT NULL,
     previous BIGINT,
     open_price BIGINT,
     first_trade BIGINT,
@@ -24,5 +24,6 @@ CREATE TABLE trade_summary (
     non_regular_value BIGINT,
     non_regular_frequency BIGINT,
     trading_date DATE,
-    created_at TIMESTAMP
+    created_at TIMESTAMP,
+    UNIQUE(ticker_code, trading_date)
 );
