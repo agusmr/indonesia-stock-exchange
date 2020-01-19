@@ -4,6 +4,7 @@ import pandas as pd
 import requests
 import sys
 from datetime import datetime, timedelta
+from functools import reduce
 from sqlalchemy import create_engine, exc
 from time import sleep
 from zipfile import BadZipFile
@@ -76,17 +77,22 @@ class FinancialStatement:
             'audit_opinion',
             'auditor'
         ]
-        df['created_at'] = datetime.now() + timedelta(hours = 7)
 
-        try:        
-            return df.to_sql(
-                'financial_statement', 
-                con=ENGINE,
-                if_exists='append',
-                index=False
-            )
-        except exc.IntegrityError:
+        return df
+    
+    def get_balance_sheet(self, source_column, target_column):
+
+        df = pd.read_excel(f'FinancialStatement-{self.year}-{self.yearly}-{self.ticker_code}.xlsx', sheet_name=2)
+        df = df[['Unnamed: 3', 'Unnamed: 1']]
+        df = df.transpose()
+        df = df.rename(columns=df.iloc[0]).iloc[1:].reset_index(drop=True)
+        try:
+            df = df[[source_column]]
+            df.columns = [target_column]
+        except KeyError:
             pass
+
+        return df
 
 def get_financial_statement():
 
@@ -97,12 +103,38 @@ def get_financial_statement():
     
     for i in range(len(financial_statement)):
         try:
-            financial_statement[i].get_general_info()
+            general_info = financial_statement[i].get_general_info()
+            total_asset = financial_statement[i].get_balance_sheet('Total assets', 'total_asset')
+            total_liability = financial_statement[i].get_balance_sheet('Total liabilities', 'total_liability')
+            total_equity = financial_statement[i].get_balance_sheet('Total equity', 'total_equity')
         except FileNotFoundError:
             pass
         except BadZipFile:
             pass
     
+    dfs = [
+        general_info,
+        total_asset, 
+        total_liability,
+        total_equity
+    ]
+    df = reduce(lambda left, right: pd.merge(
+        left,
+        right,
+        how='inner',
+        left_index=True, 
+        right_index=True), dfs)
+    df['created_at'] = datetime.now() + timedelta(hours = 7)
+
+    try:        
+        return df.to_sql(
+            'financial_statement', 
+            con=ENGINE,
+            if_exists='append',
+            index=False
+        )
+    except exc.IntegrityError:
+        pass
 
 if __name__ == '__main__':
     get_financial_statement()
