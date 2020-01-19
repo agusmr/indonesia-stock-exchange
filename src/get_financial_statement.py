@@ -107,34 +107,22 @@ def get_financial_statement():
             total_asset = financial_statement[i].get_balance_sheet('Total assets', 'total_asset')
             total_liability = financial_statement[i].get_balance_sheet('Total liabilities', 'total_liability')
             total_equity = financial_statement[i].get_balance_sheet('Total equity', 'total_equity')
+            dfs = [
+                general_info,
+                total_asset, 
+                total_liability,
+                total_equity
+            ]
+            df = reduce(lambda left, right: pd.merge(left, right, how='inner', left_index=True, right_index=True), dfs)
+            df['created_at'] = datetime.now() + timedelta(hours = 7)
+            try:        
+                df.to_sql('financial_statement', con=ENGINE, if_exists='append', index=False)
+            except exc.IntegrityError:
+                pass
         except FileNotFoundError:
             pass
         except BadZipFile:
             pass
-    
-    dfs = [
-        general_info,
-        total_asset, 
-        total_liability,
-        total_equity
-    ]
-    df = reduce(lambda left, right: pd.merge(
-        left,
-        right,
-        how='inner',
-        left_index=True, 
-        right_index=True), dfs)
-    df['created_at'] = datetime.now() + timedelta(hours = 7)
-
-    try:        
-        return df.to_sql(
-            'financial_statement', 
-            con=ENGINE,
-            if_exists='append',
-            index=False
-        )
-    except exc.IntegrityError:
-        pass
 
 if __name__ == '__main__':
     get_financial_statement()
