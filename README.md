@@ -4,6 +4,17 @@
 
 This repository aims to get the financial data of publicly listed companies in Indonesia for free (one of the things you could do especiallly when you're not rich AF) :stuck_out_tongue_closed_eyes:. It includes both technical and fundamental information, such as stock prices (opening, closing, bid, ask, volume, etc) and financial statements (balance sheet, profit and loss, changes in equity, cash flow). Surely the information contained is more diverse than we can find from other free source (e.g. Yahoo! Finance) and far cheaper than using financial terminal (e.g. Bloomberg). I hope this can be useful for your own purpose. :smile:
 
+## Robots.txt
+
+Open `https://idx.co.id/robots.txt`:
+
+```
+Server Error
+
+404 - File or directory not found.
+The resource you are looking for might have been removed, had its name changed, or is temporarily unavailable.
+```
+
 ## Folder structure
 
 ```
