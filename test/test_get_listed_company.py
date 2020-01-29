@@ -38,7 +38,6 @@ class TestListedCompany:
         count = CUR.fetchone()[0]
         assert count == len(data)
 
-    
     def test_psql_connection(self):
         PSQL_CONNECT.close()
         assert PSQL_CONNECT.closed == 1
@@ -46,4 +45,4 @@ class TestListedCompany:
     def test_cur_connection(self):
         CUR.close()
         assert CUR.closed == True
-
+        
