@@ -23,13 +23,17 @@ git clone https://github.com/ledwindra/indonesia-stock-exchange.git
 cd indonesia-stock-exchange/
 ```
 
-## Use Virtual Environment and Install Requirements
+## Use Virtual Environment and install requirements
+
+Run the following on terminal:
 
 ```
 python3 -m venv [VIRTUAL-ENVIRONMENT-NAME]
 source [VIRTUAL-ENVIRONMENT-NAME]/bin/activate
 python3 -m pip install -r requirements.txt
 ```
+
+To exit, run `deactivate`.
 
 ## Install PostgreSQL
 
