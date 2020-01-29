@@ -1,7 +1,6 @@
 import json
 import psycopg2
 import requests
-from datetime import datetime, timedelta
 
 CONNECTION = json.load(open('.connection.json'))
 PSQL_CONNECT = psycopg2.connect(
