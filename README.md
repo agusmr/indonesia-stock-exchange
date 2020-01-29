@@ -15,34 +15,6 @@ Server Error
 The resource you are looking for might have been removed, had its name changed, or is temporarily unavailable.
 ```
 
-## Folder structure
-
-```
-.
-├── LICENSE.md
-├── Procfile
-├── README.md
-├── connection.json
-├── get_financial_statement.ipynb
-├── requirements.txt
-├── run_test.sh
-├── src
-│   ├── get_company_profile.py
-│   ├── get_financial_statement.py
-│   ├── get_listed_company.py
-│   └── get_trade_summary.py
-├── test
-│   ├── test_get_company_profile.py
-│   ├── test_get_financial_statement.py
-│   ├── test_get_listed_company.py
-│   └── test_get_trade_summary.py
-└── util
-    ├── get_company_profile.sql
-    ├── get_financial_statement.sql
-    ├── get_listed_company.sql
-    └── get_trade_summary.sql
-```
-
 ## Clone
 
 ```
@@ -51,9 +23,11 @@ git clone https://github.com/ledwindra/indonesia-stock-exchange.git
 cd indonesia-stock-exchange/
 ```
 
-## Install requirements
+## Use Virtual Environment and Install Requirements
 
 ```
+python3 -m venv [VIRTUAL-ENVIRONMENT-NAME]
+source [VIRTUAL-ENVIRONMENT-NAME]/bin/activate
 python3 -m pip install -r requirements.txt
 ```
 
@@ -73,10 +47,10 @@ sudo apt-get install postgresql
 
 ## Test
 
-Test before deploying to production.
+Run the following on terminal:
 
 ```
-sh run_test.sh
+pytest test/
 ```
 
 ## Heroku
@@ -88,11 +62,7 @@ Add ons:
 
 ## Install Heroku
 
-Mac
-
-```
-brew tap heroku/brew && brew install heroku
-```
+See [here](https://devcenter.heroku.com/articles/heroku-cli)
 
 ## Connect to Heroku
 
@@ -110,7 +80,7 @@ git push heroku master
 python3 src/get_listed_company.py
 python3 src/get_company_profile.py
 python3 src/get_trade_summary.py
-python3 src/get_financial_statement.py 2019 Audit Tahunan
+python3 src/get_financial_statement.py [ARGV 1] [ARGV 2] [ARGV 3]
 ```
 
 ## End
